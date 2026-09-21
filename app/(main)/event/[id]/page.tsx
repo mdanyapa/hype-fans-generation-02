@@ -34,7 +34,7 @@ import {
 } from '@phosphor-icons/react'
 import { QRCodeSVG } from 'qrcode.react'
 import localFont from 'next/font/local'
-import posterLogo from '@/assets/poster-loog.png'
+import posterLogo from '@/assets/poster-logo.png'
 import dynamic from 'next/dynamic';
 const EventDualVideo = dynamic(() => import('@/components/EventDualVideo'), { ssr: false });
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);

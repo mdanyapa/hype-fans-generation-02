@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import { ArrowLeft, Share, Printer } from '@phosphor-icons/react'
 import { QRCodeSVG } from 'qrcode.react'
 import localFont from 'next/font/local'
-import posterLogo from '@/assets/poster-loog.png'
+import posterLogo from '@/assets/poster-logo.png'
 
 // Initialize Radiate Sans Extra Bold font from public folder
 const radiateSans = localFont({ 
