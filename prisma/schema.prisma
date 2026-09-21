@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "windows"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  username     String?       @unique
+  passwordHash String
+  role         String        @default("USER") // "USER" | "ADMIN"
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  orders       Order[]
+  reservations Reservation[]
+}
+
+model Event {
+  id          String   @id @default(cuid())
+  name        String
+  date        DateTime
+  venue       String
+  description String
+  imageUrl    String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  suites Suite[]
+}
+
+model Suite {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  features    String // JSON array stored as string
+  suiteCost   Float    @default(0) // Total cost we paid for this entire suite (internal use only)
+  audienceType String @default("HOME")
+  eventId     String
+  event       Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  seats Seat[]
+
+  @@unique([eventId, name])
+}
+
+
+model Seat {
+  id           String   @id @default(cuid())
+  seatNumber   String
+  sellingPrice Float // Price to customer (with markup)
+  status       String   @default("AVAILABLE") // "AVAILABLE" | "RESERVED" | "SOLD"
+  suiteId      String
+  suite        Suite    @relation(fields: [suiteId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  reservation Reservation?
+  orderItem   OrderItem?
+
+  @@unique([suiteId, seatNumber])
+}
+
+model Reservation {
+  id        String   @id @default(cuid())
+  seatId    String   @unique
+  seat      Seat     @relation(fields: [seatId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([expiresAt])
+}
+
+model Order {
+  id             String   @id @default(cuid())
+  orderNumber    String   @unique
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  subtotal       Float
+  donation       Float    @default(0)
+  total          Float
+  status         String   @default("PENDING") // "PENDING" | "PAID" | "CANCELLED"
+  // Guest user info
+  guestFirstName String?
+  guestLastName  String?
+  guestEmail     String?
+  guestPhone     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  seatId    String   @unique
+  seat      Seat     @relation(fields: [seatId], references: [id])
+  price     Float
+  eventName String
+  suiteName String
+  eventDate DateTime
+  createdAt DateTime @default(now())
+}
